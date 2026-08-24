@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Técnicas de Integración · Álbum Digital · Cálculo II</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+
+<style>
+  :root{
+    --bg: #0a0e27;
+    --bg-2: #0b0f2e;
+    --violet: #a78bfa;
+    --cyan: #06b6d4;
+    --magenta: #ec4899;
+    --amber: #f59e0b;
+    --emerald: #10b981;
+    --text: #f5f3ff;
+    --muted: #a3a3c9;
+    --glass: rgba(255,255,255,0.06);
+    --glass-strong: rgba(255,255,255,0.10);
+    --border: rgba(255,255,255,0.14);
+    --border-strong: rgba(255,255,255,0.28);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x:hidden;
+    min-height:100vh;
+    position:relative;
+  }
+
+  h1,h2,h3, .display{
+    font-family:'Space Grotesk', sans-serif;
+  }
+
+  /* ---------- AURORA BACKGROUND ---------- */
+  .aurora{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    overflow:hidden;
+    background: radial-gradient(circle at 20% 20%, #12163d, var(--bg) 60%);
+  }
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter: blur(90px);
+    opacity:0.55;
+    will-change: transform;
+    transition: margin 0.6s ease-out;
+  }
+  .blob1{ width:38vw; height:38vw; background:var(--violet); top:-8%; left:-6%; animation: drift1 26s ease-in-out infinite; }
+  .blob2{ width:32vw; height:32vw; background:var(--cyan); top:30%; right:-8%; animation: drift2 30s ease-in-out infinite; }
+  .blob3{ width:30vw; height:30vw; background:var(--magenta); bottom:-6%; left:20%; animation: drift3 34s ease-in-out infinite; }
+  .blob4{ width:24vw; height:24vw; background:var(--amber); bottom:10%; right:20%; animation: drift1 22s ease-in-out infinite reverse; opacity:0.35;}
+
+  @keyframes drift1{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(6vw,8vh);} }
+  @keyframes drift2{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(-7vw,6vh);} }
+  @keyframes drift3{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(5vw,-7vh);} }
+
+  .noise{
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    opacity:0.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation:none !important; }
+    html{ scroll-behavior:auto; }
+  }
+
+  /* ---------- GLASS UTILITIES ---------- */
+  .glass{
+    background: var(--glass);
+    border:1px solid var(--border);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    border-radius: 28px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky;
+    top:16px;
+    z-index:50;
+    margin: 16px auto 0;
+    max-width: 1200px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    padding: 10px 14px 10px 22px;
+  }
+  .brand{
+    font-size:0.85rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .brand span{ color: var(--muted); font-weight:400; }
+  .nav-links{
+    display:flex;
+    gap:4px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .nav-links a{
+    font-size:0.72rem;
+    font-weight:500;
+    color: var(--muted);
+    text-decoration:none;
+    padding:7px 12px;
+    border-radius:999px;
+    transition: color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+    white-space:nowrap;
+    display:inline-block;
+  }
+  .nav-links a:hover, .nav-links a:focus-visible{
+    color: var(--text);
+    background: var(--glass-strong);
+    transform: translateY(-2px);
+  }
+  .nav-links a.active{
+    color: var(--bg);
+    background: var(--text);
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    max-width: 1200px;
+    margin: 9vh auto 10vh;
+    padding: 0 20px;
+    text-align:center;
+  }
+  .hero .integral{
+    font-size: clamp(4rem, 14vw, 8rem);
+    font-family: 'Space Grotesk', serif;
+    line-height:1;
+    background: linear-gradient(135deg, var(--violet), var(--cyan) 45%, var(--magenta));
+    background-size: 220% 220%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 0.2em;
+    display:inline-block;
+    animation: floatY 5.5s ease-in-out infinite, shimmer 9s ease-in-out infinite;
+  }
+  @keyframes floatY{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-12px); } }
+  @keyframes shimmer{ 0%,100%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } }
+  @media (prefers-reduced-motion: reduce){
+    .hero .integral{ animation:none; }
+  }
+  .hero h1{
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight:700;
+    margin-bottom: 14px;
+    letter-spacing:-0.01em;
+  }
+  .hero p{
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 560px;
+    margin: 0 auto 30px;
+    line-height:1.6;
+  }
+  .hero-meta{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    font-size:0.78rem;
+    color: var(--muted);
+  }
+  .hero-meta span{
+    padding:6px 14px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background: var(--glass);
+  }
+
+  /* ---------- SECTIONS ---------- */
+  main{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 10vh;
+    display:flex;
+    flex-direction:column;
+    gap: 60px;
+  }
+
+  section.tech{
+    scroll-margin-top: 100px;
+    padding: clamp(24px, 5vw, 52px);
+    position:relative;
+    overflow:hidden;
+  }
+  section.tech::before{
+    content:'';
+    position:absolute;
+    top:-40%; right:-20%;
+    width:60%; height:80%;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    opacity:0.16;
+    filter:blur(40px);
+    pointer-events:none;
+  }
+
+  .tech-head{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    margin-bottom: 8px;
+    flex-wrap:wrap;
+  }
+  .tech-num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.85rem;
+    font-weight:600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border-strong);
+    padding: 4px 12px;
+    border-radius: 999px;
+    transition: box-shadow 0.4s ease, transform 0.4s ease;
+  }
+  section.tech:hover .tech-num{
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent);
+    transform: translateY(-2px);
+  }
+  .tech-head h2{
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight:700;
+  }
+  .tech-tagline{
+    color: var(--muted);
+    font-size:0.98rem;
+    max-width: 620px;
+    margin-bottom: 30px;
+    line-height:1.6;
+  }
+
+  .tech-grid{
+    display:grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 26px;
+  }
+  @media (max-width: 780px){
+    .tech-grid{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 22px 24px;
+    transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+  }
+  .panel:hover{
+    transform: translateY(-5px);
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    box-shadow: 0 18px 40px color-mix(in srgb, var(--accent) 22%, transparent);
+    background: rgba(255,255,255,0.05);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .panel{ transition:none; }
+    .panel:hover{ transform:none; }
+  }
+  .panel + .panel{ margin-top: 18px; }
+
+  .panel h3{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight:600;
+  }
+  .panel p{
+    color: #dcdcf2;
+    font-size:0.94rem;
+    line-height:1.65;
+  }
+  .formula-box{
+    background: rgba(0,0,0,0.22);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-top: 10px;
+    overflow-x:auto;
+    text-align:center;
+  }
+  .formula-box .katex{ font-size: 1.05em; color: var(--text); }
+
+  .when-list{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:4px;
+  }
+  .when-list li{
+    font-size:0.9rem;
+    color:#dcdcf2;
+    padding-left:20px;
+    position:relative;
+    line-height:1.5;
+  }
+  .when-list li::before{
+    content:'';
+    position:absolute;
+    left:2px; top:8px;
+    width:6px; height:6px;
+    border-radius:50%;
+    background: var(--accent);
+  }
+
+  .steps{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .step{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    opacity:0;
+    transform: translateX(-14px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .reveal.in .step:nth-child(1){ transition-delay: 0.05s; }
+  .reveal.in .step:nth-child(2){ transition-delay: 0.12s; }
+  .reveal.in .step:nth-child(3){ transition-delay: 0.19s; }
+  .reveal.in .step:nth-child(4){ transition-delay: 0.26s; }
+  .reveal.in .step:nth-child(5){ transition-delay: 0.33s; }
+  .reveal.in .step:nth-child(6){ transition-delay: 0.40s; }
+  .reveal.in .step:nth-child(7){ transition-delay: 0.47s; }
+  .reveal.in .step{ opacity:1; transform:translateX(0); }
+  @media (prefers-reduced-motion: reduce){
+    .step{ opacity:1; transform:none; transition:none; }
+  }
+  .step-num{
+    flex-shrink:0;
+    width:24px; height:24px;
+    border-radius:50%;
+    background: var(--accent);
+    color:#0a0e27;
+    font-size:0.72rem;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:2px;
+    transition: transform 0.3s ease;
+  }
+  .step:hover .step-num{ transform: scale(1.18); }
+  .step-body{ font-size:0.9rem; color:#dcdcf2; line-height:1.55; }
+  .step-body .katex{ font-size:1em; }
+
+  .triangle-panel{
+    margin-top: 26px;
+  }
+  .triangle-grid{
+    display:grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items:center;
+  }
+  @media (max-width: 780px){
+    .triangle-grid{ grid-template-columns: 1fr; }
+  }
+  .triangle-grid p{ color:#dcdcf2; font-size:0.94rem; line-height:1.65; }
+
+  .area-viz{
+    margin-top:14px;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid var(--border);
+    border-radius:14px;
+    padding: 14px;
+  }
+  .area-viz svg{ width:100%; height:auto; display:block; }
+  .area-result{
+    margin-top:12px;
+    font-size:0.88rem;
+    color: var(--muted);
+    text-align:center;
+  }
+  .area-result strong{ color: var(--text); }
+
+  /* ---------- SECTION NAV ARROWS ---------- */
+  .section-nav{
+    display:flex;
+    justify-content:space-between;
+    margin-top: 34px;
+    gap:10px;
+  }
+  .section-nav a{
+    font-size:0.8rem;
+    color: var(--muted);
+    text-decoration:none;
+    border:1px solid var(--border);
+    padding:9px 16px;
+    border-radius:999px;
+    transition: all 0.25s ease;
+  }
+  .section-nav a:hover{ color:var(--text); border-color:var(--border-strong); background: var(--glass-strong); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  ::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.15); border-radius:10px; }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+  }
+
+  /* reveal on scroll */
+  .reveal{
+    opacity:0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; transition:none; }
+  }
+
+  /* back to top */
+  #toTop{
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    width:46px; height:46px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--text);
+    text-decoration:none;
+    font-size:1.1rem;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index:60;
+  }
+  #toTop.show{ opacity:1; pointer-events:auto; }
+  #toTop:hover{ transform: translateY(-3px); }
+</style>
+</head>
+<body id="top">
+
+<div class="aurora">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+  <div class="blob blob4"></div>
+</div>
+<div class="noise"></div>
+
+<nav class="glass">
+  <div class="brand">Álbum Digital <span>· Cálculo II</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="#t01">Sustitución</a>
+    <a href="#t02">Por partes</a>
+    <a href="#t03">Trigonométricas</a>
+    <a href="#t04">Sust. trigonométrica</a>
+    <a href="#t05">Fracciones parciales</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="integral">∫</div>
+  <h1>Técnicas de Integración</h1>
+  <p>Cinco técnicas explicadas paso a paso: descripción, fórmula, ejemplo resuelto y su aplicación al cálculo de área entre curvas.</p>
+  <div class="hero-meta">
+    <span>Facultad de Ingeniería</span>
+    <span>Universidad Rafael Landívar</span>
+    <span>Cálculo II</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= 01 SUSTITUCIÓN SIMPLE ================= -->
+  <section class="tech glass reveal" id="t01" style="--accent:var(--violet)">
+    <div class="tech-head">
+      <span class="tech-num">TÉCNICA 01</span>
+      <h2>Sustitución Simple</h2>
+    </div>
+    <p class="tech-tagline">Cuando una integral esconde una función compuesta, cambiar de variable puede convertir un problema difícil en uno directo.</p>
+
+    <div class="tech-grid">
+      <div>
+        <div class="panel">
+          <h3>Descripción conceptual</h3>
+          <p>La sustitución simple reemplaza una expresión interna de la función por una nueva variable <span>$u$</span>, de modo que la integral se transforme en una versión más simple, expresada únicamente en términos de <span>$u$</span>. Es el equivalente, en integración, de la regla de la cadena en derivación.</p>
+        </div>
+        <div class="panel">
+          <h3>Fórmula clave</h3>
+          <div class="formula-box">$$\int f(g(x))\,g'(x)\,dx = \int f(u)\,du, \quad u = g(x)$$</div>
+        </div>
+        <div class="panel">
+          <h3>Cuándo utilizarla</h3>
+          <ul class="when-list">
+            <li>La integral contiene una función y, junto a ella, la derivada de su argumento interno.</li>
+            <li>Aparece una expresión "compuesta": algo elevado a una potencia, dentro de una raíz, o como exponente.</li>
+            <li>Es la primera técnica que conviene probar antes de recurrir a métodos más elaborados.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Ejemplo resuelto</h3>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><div class="step-body">Se plantea $\displaystyle\int 2x\cos(x^2)\,dx$.</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-body">Se identifica $u = x^2$, por lo que $du = 2x\,dx$.</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-body">La integral se reescribe como $\displaystyle\int \cos(u)\,du$.</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-body">Se integra: $\sin(u) + C$.</div></div>
+            <div class="step"><div class="step-num">5</div><div class="step-body">Se regresa a la variable original: $\sin(x^2) + C$.</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Aplicación: área entre curvas</h3>
+          <p>Área bajo $f(x) = 2x\sqrt{x^2+1}$ y el eje $x$, para $x \in [0,2]$, usando $u = x^2+1$.</p>
+          <div class="area-viz">
+            <svg viewBox="0 0 300 140" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--violet)" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="var(--violet)" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <line x1="20" y1="115" x2="290" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <line x1="20" y1="15" x2="20" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <path d="M20,115 Q100,110 160,70 Q220,25 270,10 L270,115 Z" fill="url(#g1)"/>
+              <path d="M20,115 Q100,110 160,70 Q220,25 270,10" fill="none" stroke="var(--violet)" stroke-width="2.5"/>
+              <line x1="270" y1="115" x2="270" y2="10" stroke="var(--violet)" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+              <line x1="20" y1="111" x2="20" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <line x1="270" y1="111" x2="270" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <text x="20" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">0</text>
+              <text x="270" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">2</text>
+              <text x="10" y="20" fill="rgba(255,255,255,0.4)" font-size="10">y</text>
+              <text x="294" y="118" fill="rgba(255,255,255,0.4)" font-size="10">x</text>
+            </svg>
+          </div>
+          <div class="area-result">$\displaystyle\int_0^2 2x\sqrt{x^2+1}\,dx = \left[\tfrac{2}{3}(x^2+1)^{3/2}\right]_0^2 = \tfrac{2}{3}(5\sqrt5 - 1)$ &nbsp;→&nbsp; <strong>≈ 6.79 u²</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-nav">
+      <span></span>
+      <a href="#t02">Siguiente: Integración por partes →</a>
+    </div>
+  </section>
+
+  <!-- ================= 02 INTEGRACIÓN POR PARTES ================= -->
+  <section class="tech glass reveal" id="t02" style="--accent:var(--cyan)">
+    <div class="tech-head">
+      <span class="tech-num">TÉCNICA 02</span>
+      <h2>Integración por Partes</h2>
+    </div>
+    <p class="tech-tagline">Cuando dos funciones de naturaleza distinta se multiplican dentro de una integral, conviene "traspasar" la derivada de una a la otra.</p>
+
+    <div class="tech-grid">
+      <div>
+        <div class="panel">
+          <h3>Descripción conceptual</h3>
+          <p>Proviene de la regla del producto para derivadas, aplicada en reversa. Se elige una parte del integrando como $u$ (que se deriva) y otra como $dv$ (que se integra), buscando que la nueva integral resultante sea más sencilla que la original.</p>
+        </div>
+        <div class="panel">
+          <h3>Fórmula clave</h3>
+          <div class="formula-box">$$\int u\,dv = uv - \int v\,du$$</div>
+        </div>
+        <div class="panel">
+          <h3>Cuándo utilizarla</h3>
+          <ul class="when-list">
+            <li>El integrando es un producto de funciones de tipo distinto (polinomio, exponencial, logaritmo, trigonométrica).</li>
+            <li>La guía LIATE ayuda a elegir $u$: Logarítmica, Inversa trigonométrica, Algebraica, Trigonométrica, Exponencial.</li>
+            <li>Al derivar $u$ el resultado se simplifica, o al integrar $dv$ no se complica.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Ejemplo resuelto</h3>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><div class="step-body">Se plantea $\displaystyle\int x\,e^x\,dx$. Aparece el producto de un polinomio ($x$) con una exponencial ($e^x$): funciones de naturaleza distinta, señal de que conviene usar integración por partes.</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-body">Se eligen las partes con la guía LIATE: entre $x$ (Algebraica) y $e^x$ (Exponencial), se toma como $u$ la que aparece primero en la lista. Así, $u = x$ (se deriva y se simplifica) y $dv = e^x dx$ (se integra sin complicarse).</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-body">Se calculan las piezas que faltan: derivando $u=x$ se obtiene $du = dx$; integrando $dv = e^x dx$ se obtiene $v = e^x$.</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-body">Se sustituyen las cuatro piezas ($u$, $v$, $du$, $dv$) en la fórmula $\int u\,dv = uv - \int v\,du$: $xe^x - \displaystyle\int e^x\,dx$.</div></div>
+            <div class="step"><div class="step-num">5</div><div class="step-body">La integral que queda ya es directa, sin necesidad de otra técnica: $\displaystyle\int e^x\,dx = e^x$.</div></div>
+            <div class="step"><div class="step-num">6</div><div class="step-body">Se junta todo y se agrega la constante de integración: $xe^x - e^x + C$.</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Aplicación: área entre curvas</h3>
+          <p>Área entre $f(x) = x e^x$ y el eje $x$, para $x \in [0,1]$.</p>
+          <div class="area-viz">
+            <svg viewBox="0 0 300 140" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <line x1="20" y1="115" x2="290" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <line x1="20" y1="15" x2="20" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <path d="M20,115 Q80,114 140,95 Q200,65 260,15 L260,115 Z" fill="url(#g2)"/>
+              <path d="M20,115 Q80,114 140,95 Q200,65 260,15" fill="none" stroke="var(--cyan)" stroke-width="2.5"/>
+              <line x1="260" y1="115" x2="260" y2="15" stroke="var(--cyan)" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+              <line x1="20" y1="111" x2="20" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <line x1="260" y1="111" x2="260" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <text x="20" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">0</text>
+              <text x="260" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">1</text>
+              <text x="10" y="20" fill="rgba(255,255,255,0.4)" font-size="10">y</text>
+              <text x="278" y="118" fill="rgba(255,255,255,0.4)" font-size="10">x</text>
+            </svg>
+          </div>
+          <div class="area-result">$\displaystyle\int_0^1 x e^x\,dx = \left[xe^x - e^x\right]_0^1 = (0) - (-1)$ &nbsp;→&nbsp; <strong>= 1 u²</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-nav">
+      <a href="#t01">← Sustitución simple</a>
+      <a href="#t03">Siguiente: Integrales trigonométricas →</a>
+    </div>
+  </section>
+
+  <!-- ================= 03 INTEGRALES TRIGONOMÉTRICAS ================= -->
+  <section class="tech glass reveal" id="t03" style="--accent:var(--magenta)">
+    <div class="tech-head">
+      <span class="tech-num">TÉCNICA 03</span>
+      <h2>Integrales Trigonométricas</h2>
+    </div>
+    <p class="tech-tagline">Productos y potencias de seno, coseno y sus parientes se domestican con identidades pitagóricas y una sustitución bien elegida.</p>
+
+    <div class="tech-grid">
+      <div>
+        <div class="panel">
+          <h3>Descripción conceptual</h3>
+          <p>Se trabaja con integrales que combinan potencias de funciones trigonométricas, como $\sin^m x \cos^n x$. La estrategia depende de la paridad de los exponentes: si uno es impar, se "separa" un factor y se usa $\sin^2x + \cos^2x = 1$ para convertir el resto en una sustitución simple.</p>
+        </div>
+        <div class="panel">
+          <h3>Fórmula clave</h3>
+          <div class="formula-box">$$\sin^2x + \cos^2x = 1 \qquad \int \sin^m x \cos^n x\,dx$$</div>
+        </div>
+        <div class="panel">
+          <h3>Cuándo utilizarla</h3>
+          <ul class="when-list">
+            <li>El integrando combina potencias de seno y coseno (o tangente y secante) del mismo ángulo.</li>
+            <li>Al menos uno de los exponentes es impar, lo que permite reservar un factor para $du$.</li>
+            <li>Cuando ambos exponentes son pares se recurre a identidades de ángulo doble.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Ejemplo resuelto</h3>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><div class="step-body">Se plantea $\displaystyle\int \sin^3x\cos^2x\,dx$. El exponente de $\sin x$ es impar (3) y el de $\cos x$ es par (2): esa es la señal para reservar un factor de seno y dejar todo lo demás en términos de coseno.</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-body">Se separa $\sin^3x = \sin x \cdot \sin^2x$, y se aplica la identidad pitagórica $\sin^2x = 1-\cos^2x$ a lo que queda: $\displaystyle\int \sin x\,(1-\cos^2x)\cos^2x\,dx$.</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-body">Ahora todo el integrando está en términos de $\cos x$, excepto el factor $\sin x\,dx$ que se reservó. Esto permite sustituir $u = \cos x$, de donde $du = -\sin x\,dx$, es decir, $\sin x\,dx = -du$.</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-body">Se reemplaza en la integral: $\displaystyle\int (1-u^2)u^2\,(-du) = -\int (1-u^2)u^2\,du$.</div></div>
+            <div class="step"><div class="step-num">5</div><div class="step-body">Se expande el integrando: $(1-u^2)u^2 = u^2-u^4$, así que la integral queda $-\displaystyle\int (u^2-u^4)\,du$.</div></div>
+            <div class="step"><div class="step-num">6</div><div class="step-body">Se integra término a término: $-\left(\dfrac{u^3}{3} - \dfrac{u^5}{5}\right)+C$.</div></div>
+            <div class="step"><div class="step-num">7</div><div class="step-body">Se regresa a la variable original sustituyendo $u=\cos x$: $-\dfrac{\cos^3x}{3} + \dfrac{\cos^5x}{5} + C$.</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Aplicación: área entre curvas</h3>
+          <p>Área bajo $f(x) = \sin^2x\cos x$ y el eje $x$, para $x \in [0, \pi/2]$.</p>
+          <div class="area-viz">
+            <svg viewBox="0 0 300 140" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--magenta)" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="var(--magenta)" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <line x1="20" y1="115" x2="290" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <line x1="20" y1="15" x2="20" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <path d="M20,115 Q90,60 150,45 Q210,60 270,115 Z" fill="url(#g3)"/>
+              <path d="M20,115 Q90,60 150,45 Q210,60 270,115" fill="none" stroke="var(--magenta)" stroke-width="2.5"/>
+              <line x1="20" y1="111" x2="20" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <line x1="270" y1="111" x2="270" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <text x="20" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">0</text>
+              <text x="270" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">π/2</text>
+              <text x="10" y="20" fill="rgba(255,255,255,0.4)" font-size="10">y</text>
+              <text x="278" y="118" fill="rgba(255,255,255,0.4)" font-size="10">x</text>
+            </svg>
+          </div>
+          <div class="area-result">$\displaystyle\int_0^{\pi/2} \sin^2x\cos x\,dx = \left[\tfrac{\sin^3x}{3}\right]_0^{\pi/2}$ &nbsp;→&nbsp; <strong>= 1/3 u²</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-nav">
+      <a href="#t02">← Integración por partes</a>
+      <a href="#t04">Siguiente: Sustitución trigonométrica →</a>
+    </div>
+  </section>
+
+  <!-- ================= 04 SUSTITUCIÓN TRIGONOMÉTRICA ================= -->
+  <section class="tech glass reveal" id="t04" style="--accent:var(--amber)">
+    <div class="tech-head">
+      <span class="tech-num">TÉCNICA 04</span>
+      <h2>Sustitución Trigonométrica</h2>
+    </div>
+    <p class="tech-tagline">Cuando una raíz cuadrada esconde un triángulo rectángulo, conviene dejar que un ángulo haga el trabajo algebraico.</p>
+
+    <div class="tech-grid">
+      <div>
+        <div class="panel">
+          <h3>Descripción conceptual</h3>
+          <p>Ciertas expresiones bajo un radical corresponden exactamente a un lado de un triángulo rectángulo descrito por identidades trigonométricas. Sustituir $x$ por una función trigonométrica de $\theta$ elimina la raíz por completo.</p>
+        </div>
+        <div class="panel">
+          <h3>Fórmula clave</h3>
+          <div class="formula-box">
+            $$\begin{aligned}\sqrt{a^2-x^2} &\to x=a\sin\theta \\[4px] \sqrt{a^2+x^2} &\to x=a\tan\theta \\[4px] \sqrt{x^2-a^2} &\to x=a\sec\theta\end{aligned}$$
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Cuándo utilizarla</h3>
+          <ul class="when-list">
+            <li>Aparece una raíz cuadrada de una suma o diferencia de cuadrados que no se simplifica con sustitución simple.</li>
+            <li>La expresión bajo el radical tiene una de las tres formas: $a^2-x^2$, $a^2+x^2$ o $x^2-a^2$.</li>
+            <li>Después de sustituir, conviene dibujar el triángulo de referencia para deshacer el cambio de variable.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Ejemplo resuelto</h3>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><div class="step-body">Se plantea $\displaystyle\int \sqrt{4-x^2}\,dx$. La expresión bajo la raíz tiene la forma $a^2-x^2$ (con $a=2$), así que corresponde la sustitución $x = a\sin\theta$.</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-body">Se sustituye $x = 2\sin\theta$, por lo que $dx = 2\cos\theta\,d\theta$. Además, $4-x^2 = 4-4\sin^2\theta = 4\cos^2\theta$, de modo que $\sqrt{4-x^2} = 2\cos\theta$: la raíz desaparece por completo.</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-body">Se reemplazan ambas piezas en la integral original: $\displaystyle\int 2\cos\theta \cdot 2\cos\theta\,d\theta = 4\int \cos^2\theta\,d\theta$.</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-body">Como quedó una potencia par de coseno, se usa la identidad de ángulo doble $\cos^2\theta = \dfrac{1+\cos2\theta}{2}$: $4\displaystyle\int \dfrac{1+\cos2\theta}{2}\,d\theta = 2\theta + \sin2\theta + C$.</div></div>
+            <div class="step"><div class="step-num">5</div><div class="step-body">Falta regresar de $\theta$ a $x$. Con el triángulo de referencia (ver abajo): $\theta = \arcsin(x/2)$, $\sin\theta = x/2$ y $\cos\theta = \sqrt{4-x^2}/2$. Usando $\sin2\theta = 2\sin\theta\cos\theta$: $\sin2\theta = 2\cdot\dfrac{x}{2}\cdot\dfrac{\sqrt{4-x^2}}{2} = \dfrac{x\sqrt{4-x^2}}{2}$.</div></div>
+            <div class="step"><div class="step-num">6</div><div class="step-body">Se sustituyen ambas expresiones en el resultado del paso 4: $2\arcsin\!\left(\dfrac{x}{2}\right) + \dfrac{x\sqrt{4-x^2}}{2} + C$.</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Aplicación: área entre curvas</h3>
+          <p>Área bajo $f(x) = \sqrt{4-x^2}$ y el eje $x$, para $x \in [0,2]$ — un cuarto de círculo de radio 2.</p>
+          <div class="area-viz">
+            <svg viewBox="0 0 300 140" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--amber)" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="var(--amber)" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <line x1="20" y1="115" x2="290" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <line x1="20" y1="15" x2="20" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <path d="M20,15 A100,100 0 0,1 120,115 L20,115 Z" fill="url(#g4)"/>
+              <path d="M20,15 A100,100 0 0,1 120,115" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+              <line x1="120" y1="115" x2="120" y2="15" stroke="var(--amber)" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+              <line x1="20" y1="111" x2="20" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <line x1="120" y1="111" x2="120" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <line x1="16" y1="15" x2="24" y2="15" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <text x="20" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">0</text>
+              <text x="120" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">2</text>
+              <text x="8" y="18" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="end">2</text>
+              <text x="10" y="108" fill="rgba(255,255,255,0.4)" font-size="10">y</text>
+              <text x="278" y="118" fill="rgba(255,255,255,0.4)" font-size="10">x</text>
+            </svg>
+          </div>
+          <div class="area-result">$\displaystyle\int_0^2 \sqrt{4-x^2}\,dx = \left[2\arcsin(x/2) + \tfrac{x\sqrt{4-x^2}}{2}\right]_0^2$ &nbsp;→&nbsp; <strong>= π u²</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel triangle-panel">
+      <h3>El triángulo de referencia</h3>
+      <div class="triangle-grid">
+        <div class="area-viz" style="margin-top:0;">
+          <svg viewBox="0 0 260 170" preserveAspectRatio="xMidYMid meet">
+            <polygon points="30,150 220,150 220,40" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+            <path d="M200,150 L200,130 L220,130" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+            <path d="M55,150 A25,25 0 0,1 70,132" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+            <text x="47" y="140" fill="rgba(255,255,255,0.55)" font-size="11">θ</text>
+            <text x="118" y="170" fill="#dcdcf2" font-size="12">√(4−x²) &nbsp;(adyacente)</text>
+            <text x="225" y="98" fill="#dcdcf2" font-size="12">x &nbsp;(opuesto)</text>
+            <text x="95" y="88" fill="var(--amber)" font-size="12">2 &nbsp;(hipotenusa)</text>
+          </svg>
+        </div>
+        <p>Como $x = 2\sin\theta$, se cumple $\sin\theta = \dfrac{x}{2} = \dfrac{\text{opuesto}}{\text{hipotenusa}}$. Se dibuja entonces un triángulo rectángulo con hipotenusa $2$ y cateto opuesto a $\theta$ igual a $x$. Por el teorema de Pitágoras, el cateto adyacente es $\sqrt{4-x^2}$.</p>
+      </div>
+      <p style="margin-top:14px;">Ese triángulo permite leer directamente cualquier función trigonométrica de $\theta$ en términos de $x$, sin recurrir a identidades adicionales: $\cos\theta = \dfrac{\sqrt{4-x^2}}{2}$, $\tan\theta = \dfrac{x}{\sqrt{4-x^2}}$, y así con las demás. Esto es lo que permite, en el paso final, regresar de $\theta$ a la variable original $x$.</p>
+    </div>
+
+    <div class="section-nav">
+      <a href="#t03">← Integrales trigonométricas</a>
+      <a href="#t05">Siguiente: Fracciones parciales →</a>
+    </div>
+  </section>
+
+  <!-- ================= 05 FRACCIONES PARCIALES ================= -->
+  <section class="tech glass reveal" id="t05" style="--accent:var(--emerald)">
+    <div class="tech-head">
+      <span class="tech-num">TÉCNICA 05</span>
+      <h2>Fracciones Parciales</h2>
+    </div>
+    <p class="tech-tagline">Una fracción racional complicada suele ser, en realidad, varias fracciones simples sumadas — solo hay que separarlas.</p>
+
+    <div class="tech-grid">
+      <div>
+        <div class="panel">
+          <h3>Descripción conceptual</h3>
+          <p>Toda función racional $P(x)/Q(x)$, con el grado de $P$ menor al de $Q$, puede descomponerse en una suma de fracciones más simples según los factores del denominador: lineales, cuadráticos, repetidos o no repetidos. Cada fracción resultante se integra por separado, casi siempre como logaritmo o arcotangente.</p>
+        </div>
+        <div class="panel">
+          <h3>Fórmula clave</h3>
+          <div class="formula-box">$$\frac{P(x)}{(x-a)(x-b)} = \frac{A}{x-a} + \frac{B}{x-b}$$</div>
+        </div>
+        <div class="panel">
+          <h3>Cuándo utilizarla</h3>
+          <ul class="when-list">
+            <li>El integrando es una función racional (un polinomio dividido entre otro) que no se simplifica directamente.</li>
+            <li>El denominador se puede factorizar en términos lineales y/o cuadráticos.</li>
+            <li>Factores repetidos requieren un término adicional por cada potencia; factores cuadráticos irreducibles llevan numerador lineal.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Ejemplo resuelto</h3>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><div class="step-body">Se plantea $\displaystyle\int \dfrac{3x+5}{(x-1)(x+2)}\,dx$. El denominador ya está factorizado en dos factores lineales distintos, así que la fracción se puede separar en dos más simples.</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-body">Como los factores son lineales y no se repiten, a cada uno le corresponde una constante desconocida en el numerador: $\dfrac{3x+5}{(x-1)(x+2)} = \dfrac{A}{x-1}+\dfrac{B}{x+2}$.</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-body">Se multiplican ambos lados por $(x-1)(x+2)$ para eliminar los denominadores, y se expande el lado derecho agrupando por potencias de $x$: $3x+5 = A(x+2)+B(x-1) = (A+B)x + (2A-B)$.</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-body">Para que esta igualdad sea válida para todo $x$, los coeficientes de cada potencia deben coincidir a ambos lados. Comparando el coeficiente de $x$ y el término independiente se arma un sistema con dos incógnitas:
+              <div class="formula-box" style="margin-top:8px;">$$\begin{aligned} A+B &= 3 \\ 2A-B &= 5 \end{aligned}$$</div>
+            </div></div>
+            <div class="step"><div class="step-num">5</div><div class="step-body">Se resuelve el sistema por eliminación: sumando ambas ecuaciones, el término $B$ se cancela: $3A = 8 \Rightarrow A = \dfrac{8}{3}$. Sustituyendo ese valor en la primera ecuación: $B = 3 - \dfrac{8}{3} = \dfrac{1}{3}$.</div></div>
+            <div class="step"><div class="step-num">6</div><div class="step-body">Con $A$ y $B$ conocidos, se integra cada fracción por separado, ya que ambas son del tipo $\int \frac{k}{x-c}\,dx = k\ln|x-c|$: $\displaystyle\int \dfrac{8/3}{x-1}\,dx = \dfrac{8}{3}\ln|x-1|$ &nbsp; y &nbsp; $\displaystyle\int \dfrac{1/3}{x+2}\,dx = \dfrac{1}{3}\ln|x+2|$.</div></div>
+            <div class="step"><div class="step-num">7</div><div class="step-body">Se suman ambos resultados y se agrega la constante de integración: $\dfrac{8}{3}\ln|x-1| + \dfrac{1}{3}\ln|x+2| + C$.</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Aplicación: área entre curvas</h3>
+          <p>Área bajo $f(x) = \dfrac{3x+5}{(x-1)(x+2)}$ y el eje $x$, para $x \in [2,4]$.</p>
+          <div class="area-viz">
+            <svg viewBox="0 0 300 140" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="g5" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--emerald)" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="var(--emerald)" stop-opacity="0.05"/>
+                </linearGradient>
+              </defs>
+              <line x1="20" y1="115" x2="290" y2="115" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <line x1="20" y1="15" x2="20" y2="115" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="2,3"/>
+              <path d="M20,115 Q90,95 150,60 Q210,35 270,20 L270,115 Z" fill="url(#g5)"/>
+              <path d="M20,115 Q90,95 150,60 Q210,35 270,20" fill="none" stroke="var(--emerald)" stroke-width="2.5"/>
+              <line x1="270" y1="115" x2="270" y2="20" stroke="var(--emerald)" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+              <path d="M11,120 L17,108 M17,120 L23,108" stroke="rgba(255,255,255,0.5)" stroke-width="1.3" fill="none"/>
+              <line x1="20" y1="111" x2="20" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <line x1="270" y1="111" x2="270" y2="119" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+              <text x="20" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">2</text>
+              <text x="270" y="129" fill="rgba(255,255,255,0.6)" font-size="10" text-anchor="middle">4</text>
+              <text x="10" y="20" fill="rgba(255,255,255,0.4)" font-size="10">y</text>
+              <text x="278" y="118" fill="rgba(255,255,255,0.4)" font-size="10">x</text>
+            </svg>
+          </div>
+          <div class="area-result">$\displaystyle\int_2^4 \dfrac{3x+5}{(x-1)(x+2)}\,dx = \left[\tfrac{8}{3}\ln|x-1|+\tfrac{1}{3}\ln|x+2|\right]_2^4$ &nbsp;→&nbsp; <strong>≈ 3.06 u²</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-nav">
+      <a href="#t04">← Sustitución trigonométrica</a>
+      <a href="#top">Volver al inicio ↑</a>
+    </div>
+  </section>
+
+</main>
+
+<a href="#top" id="toTop" class="glass" aria-label="Volver arriba">↑</a>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left:"$$", right:"$$", display:true},
+          {left:"$", right:"$", display:false}
+        ],
+        throwOnError:false
+      });
+    }
+
+    // scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // prep SVG outline paths for a "draw-in" animation
+    const outlinePaths = document.querySelectorAll('.area-viz path[fill="none"]');
+    outlinePaths.forEach(p=>{
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = prefersReducedMotion ? 0 : len;
+      p.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.65,0,0.35,1)';
+    });
+
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add('in');
+          e.target.querySelectorAll('.area-viz path[fill="none"]').forEach(p=>{
+            requestAnimationFrame(()=>{ p.style.strokeDashoffset = 0; });
+          });
+          io.unobserve(e.target);
+        }
+      });
+    }, {threshold:0.12});
+    revealEls.forEach(el=>io.observe(el));
+
+    // gentle mouse parallax on the aurora blobs
+    if(!prefersReducedMotion){
+      const blobs = document.querySelectorAll('.blob');
+      window.addEventListener('mousemove', (e)=>{
+        const x = (e.clientX / window.innerWidth - 0.5);
+        const y = (e.clientY / window.innerHeight - 0.5);
+        blobs.forEach((b, i)=>{
+          const strength = (i + 1) * 8;
+          b.style.marginLeft = (x * strength) + 'px';
+          b.style.marginTop = (y * strength) + 'px';
+        });
+      }, { passive:true });
+    }
+
+    // active nav link
+    const sections = document.querySelectorAll('section.tech');
+    const links = document.querySelectorAll('#navLinks a');
+    const navObs = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        const id = entry.target.getAttribute('id');
+        const link = document.querySelector('#navLinks a[href="#'+id+'"]');
+        if(entry.isIntersecting){
+          links.forEach(l=>l.classList.remove('active'));
+          if(link) link.classList.add('active');
+        }
+      });
+    }, {rootMargin:'-40% 0px -50% 0px', threshold:0});
+    sections.forEach(s=>navObs.observe(s));
+
+    // back to top visibility
+    const toTop = document.getElementById('toTop');
+    window.addEventListener('scroll', ()=>{
+      if(window.scrollY > 600) toTop.classList.add('show');
+      else toTop.classList.remove('show');
+    });
+  });
+</script>
+
+</body>
+</html>
